@@ -4,12 +4,13 @@ import NoteCard from "./noteCard";
 import NoteEditor from "./noteEditor";
 
 function NoteViewer(props) {
+    const loginCont = useContext(LoginContext);
     const [notes, setNotes] = useState(null);
 
     useEffect(() => {
-        let apiUrl = 'http://localhost:7071';
+        let apiUrl = 'https://fn-noteapp-server.azurewebsites.net';
 
-        let completeApi = `${apiUrl}/api/GetNotes`;
+        let completeApi = `${apiUrl}/api/GetNotes?email=${encodeURIComponent(loginCont.loginState.email)}`;
 
         fetch(completeApi, {
             method: "GET"

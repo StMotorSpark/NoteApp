@@ -2,6 +2,7 @@ module.exports = async function (context, req) {
     context.log('JavaScript HTTP trigger function processed a request.');
 
     const userEmail = req.query.email;
+    const noteName = req.query.note
 
     var Connection = require('tedious').Connection;
     var Request = require('tedious').Request;
@@ -23,12 +24,12 @@ module.exports = async function (context, req) {
     }
     var connection = new Connection(config);
 
-    let sql = `
-    select [NOTE_NAME], [CREATED_DATE] from [NOTES]
+    let sql = `select [NOTE_CONTENT] from [NOTES]
     where [USER_EMAIL] = N'${userEmail}'
+    and [NOTE_NAME] = N'${noteName}'
     `;
 
-    const responseMessage = [];
+    let responseMessage = null;
 
     return new Promise((resolve) => {
         // Attempt to connect and execute queries if connection goes through
@@ -45,12 +46,9 @@ module.exports = async function (context, req) {
                 });
 
                 request.on('row', function (columns) {
-                    let rowItem = {
-                        name: columns.filter(item => item.metadata.colName === "NOTE_NAME")[0].value,
-                        created: columns.filter(item => item.metadata.colName === "CREATED_DATE")[0].value
-                    };
+                    let content = columns.filter(item => item.metadata.colName === "NOTE_CONTENT")[0].value;
 
-                    responseMessage.push(rowItem);
+                    responseMessage = content;
                 });
 
                 request.on('doneProc', () => {
@@ -59,6 +57,12 @@ module.exports = async function (context, req) {
                         body: responseMessage
                     };
                     resolve();
+                })
+
+                request.on("error", (err) => {
+                    if(err) {
+                        console.log(err);
+                    }
                 })
 
                 connection.execSql(request);

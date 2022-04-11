@@ -1,16 +1,35 @@
-import React, { useRef } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Editor } from '@tinymce/tinymce-react';
+import { LoginContext } from "../hooks/loginHook";
 
 
 function NoteEditor(props) {
+    const loginCont = useContext(LoginContext);
     const editorRef = useRef(null);
+    const [noteContent, setNoteContent] = useState(null);
 
-    return <div>
-        Edititing Note {props.noteName}
+    useEffect(() => {
+        let apiUrl = 'https://fn-noteapp-server.azurewebsites.net';
 
-        <Editor
+        let completeApi = `${apiUrl}/api/GetNoteContent?email=${encodeURIComponent(loginCont.loginState.email)}&note=${encodeURIComponent(props.noteName)}`;
+
+        fetch(completeApi, {
+            method: "GET"
+        })
+            .then(res => res.text())
+            .then(data => {
+                setNoteContent(data);
+            })
+            .catch(err => {
+                console.log(err);
+            })
+    }, []);
+
+    let contentDisp = null
+    if (noteContent !== null) {
+        contentDisp = <Editor
             onInit={(evt, editor) => editorRef.current = editor}
-            initialValue="<p>This is the initial content of the editor.</p>"
+            initialValue={noteContent}
             init={{
                 height: 500,
                 menubar: false,
@@ -26,6 +45,12 @@ function NoteEditor(props) {
                 content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
             }}
         />
+    }
+
+    return <div>
+        Edititing Note {props.noteName}
+
+        {contentDisp}
     </div>
 }
 
