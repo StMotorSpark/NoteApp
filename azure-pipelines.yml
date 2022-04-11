@@ -52,11 +52,11 @@ stages:
     - task: ArchiveFiles@2
       displayName: 'Archive files'
       inputs:
-        rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/FunctionAppServer'
         includeRootFolder: false
         archiveType: zip
-        archiveFile: $(Build.ArtifactStagingDirectory)/FunctionAppServer/$(Build.BuildId).zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
         replaceExistingArchive: true
 
-    - upload: $(Build.ArtifactStagingDirectory)/FunctionAppServer/$(Build.BuildId).zip
+    - upload: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
       artifact: drop
